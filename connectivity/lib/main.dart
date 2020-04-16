@@ -1,9 +1,10 @@
 import 'package:connectivity/IConnectivity.dart';
-import 'package:flushbar/flushbar_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 
 import 'connection_checker.dart';
+import 'home.dart';
 
 void main() => runApp(MyApp());
 
@@ -13,34 +14,34 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  IConnectivty connectivity = ConnectionChecker();
+  final IConnectivty connectivity = ConnectionChecker();
+
   @override
   Widget build(BuildContext context) {
     return StreamProvider(
-      create: (_) => connectivity.onConnectivityChange(),
-      child: Consumer<bool>(
-        builder: (context, bool isConnected, Widget child) {
-          if (isConnected != null) {
-            print('$isConnected');
-            if (isConnected) {
-              FlushbarHelper.createSuccess(
-                  message: 'Connected', title: 'Online');
-            } else {
-              FlushbarHelper.createSuccess(
-                  message: 'Disconnected', title: 'Offline');
+        create: (_) => connectivity.onConnectivityChange(),
+        child: Consumer<bool>(
+          builder: (context, bool isConnected, Widget child) {
+            if (isConnected != null) {
+              String message = isConnected ? 'Online' : 'Offline';
+              Fluttertoast.showToast(msg: message);
             }
-          }
-          return child;
-        },
-        child: MaterialApp(
-          title: 'Flutter Demo',
-          theme: ThemeData(
-            primarySwatch: Colors.blue,
+            return child;
+          },
+          child: MaterialApp(
+            title: 'Flutter Demo',
+            theme: ThemeData(
+              primarySwatch: Colors.blue,
+            ),
+            home: MyHomePage(title: 'Flutter Demo Home Page'),
           ),
-          home: MyHomePage(title: 'Flutter Demo Home Page'),
-        ),
-      ),
-    );
+        ));
+  }
+
+  @override
+  void dispose() {
+    connectivity.stopConnectivityUpdates();
+    super.dispose();
   }
 }
 
@@ -79,6 +80,19 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.display1,
             ),
+            SizedBox(height: 10),
+            RaisedButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return Page1();
+                    },
+                  ),
+                );
+              },
+              child: Text("Navigate to Page 1"),
+            )
           ],
         ),
       ),
